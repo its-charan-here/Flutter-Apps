@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:try01/result.dart';
 
-import './question.dart';
-import './answer.dart';
+import './quiz.dart';
+import './result.dart';
 
 // void main() {
 //   runApp(MyApp());
@@ -20,54 +21,75 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   //adding underscore turns a public class into a private classs
-  var _questionIndex = 0;
+  final _questions = const [
+    {
+      'questionText': 'What\'s your favourite colour?',
+      'answers': [
+        {'text': 'Black', 'score': 1},
+        {'text': 'Blue', 'score': 4},
+        {'text': 'Red', 'score': 5},
+        {'text': 'Green', 'score': 2}
+      ],
+    },
+    {
+      'questionText': 'What\'s your favourite pet?',
+      'answers': [
+        {'text': 'Dog', 'score': 2},
+        {'text': 'Cat', 'score': 6},
+        {'text': 'Rabbit', 'score': 16},
+        {'text': 'Turtle', 'score': 20}
+      ],
+    },
+    {
+      'questionText': 'How many months have 28 days?',
+      'answers': [
+        {'text': '2', 'score': 6},
+        {'text': '1', 'score': 10},
+        {'text': 'All of them', 'score': 7},
+        {'text': 'Depends if there\'s a leap year or not', 'score': 1}
+      ],
+    }
+  ];
 
-  void _answerQuestion() {
-    setState(() {
+  var _questionIndex = 0;
+  var _totalScore = 0;
+
+void _resetQuiz() {
+  setState(() {
+    _questionIndex = 0;
+    _totalScore = 0;
+  });
+}
+
+  void _answerQuestion( int score) {
+
+    _totalScore += score;
+    setState(() { // setState always retriggers thee build method of the app and the widget tree is rebuilt
       _questionIndex = _questionIndex + 1;
     });
     print(_questionIndex);
+    if (_questionIndex < _questions.length) {
+      print('We have more Questions!');
+    } else {
+      print("No more questions left!");
+    }
     // print('Answer Chosen!');
   }
 
   @override // to make it clear that u r deliberately overriding the given class
   Widget build(BuildContext context) {
-    var questions = [
-      {
-        'questionText': 'What\'s your favourite colour?',
-        'answers': ['Black', 'Blue', 'Red', 'Green'],
-      },
-      {
-        'questionText': 'What\'s your favourite pet?',
-        'answers': ['Dog', 'Cat', 'Rabbit', 'Turtle'],
-      },
-      {
-        'questionText': 'How many months have 28 days?',
-        'answers': [
-          '2',
-          '1',
-          'All of them',
-          'Depends if there\'s a leap year or not'
-        ],
-      }
-    ];
-    return MaterialApp(
+    return  MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: Text("My First App"),
         ),
-        body: Column(
-          children: [
-            Question(
-              questions[_questionIndex]['questionText'],
-            ),
-            ...(questions[_questionIndex]['answers'] as List<String>)
-                .map((answer) {
-              // print(answer);
-              return Answer(_answerQuestion, answer);
-            }).toList()
-          ],
-        ),
+        body: _questionIndex < _questions.length
+            ? Quiz(
+                answerQuestion: _answerQuestion,
+                questionIndex: _questionIndex,
+                questions: _questions,
+              )
+            : Result(_totalScore, _resetQuiz),
       ),
     );
   }
